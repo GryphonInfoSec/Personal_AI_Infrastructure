@@ -181,17 +181,89 @@ function getVolumeSetting(): number {
   return 0.8;
 }
 
-// Play audio using afplay (macOS)
+// Detect available audio player on the system
+function detectAudioPlayer(): { command: string; args: (volume: number, file: string) => string[] } | null {
+  const platform = process.platform;
+
+  if (platform === 'darwin') {
+    // macOS - use afplay
+    return {
+      command: '/usr/bin/afplay',
+      args: (volume: number, file: string) => ['-v', volume.toString(), file]
+    };
+  } else if (platform === 'linux') {
+    // Linux - try multiple players in order of preference
+    const players = [
+      {
+        command: '/usr/bin/paplay',
+        args: (volume: number, file: string) => {
+          // paplay uses 0-65536 volume range
+          const paVolume = Math.floor(volume * 65536);
+          return ['--volume', paVolume.toString(), file];
+        }
+      },
+      {
+        command: '/usr/bin/mpg123',
+        args: (volume: number, file: string) => {
+          // mpg123 uses 0-100 percentage
+          const mpgVolume = Math.floor(volume * 100);
+          return ['-f', mpgVolume.toString(), file];
+        }
+      },
+      {
+        command: '/usr/bin/ffplay',
+        args: (volume: number, file: string) => {
+          // ffplay uses 0-100 volume
+          const ffVolume = Math.floor(volume * 100);
+          return ['-nodisp', '-autoexit', '-volume', ffVolume.toString(), file];
+        }
+      },
+      {
+        command: '/usr/bin/aplay',
+        args: (_volume: number, file: string) => {
+          // aplay doesn't support volume control directly, use system volume
+          return [file];
+        }
+      }
+    ];
+
+    // Check which player is available
+    for (const player of players) {
+      try {
+        const { execSync } = require('child_process');
+        execSync(`which ${player.command.split('/').pop()}`, { stdio: 'ignore' });
+        return player;
+      } catch {
+        continue;
+      }
+    }
+  }
+
+  return null;
+}
+
+// Play audio using platform-appropriate player
 async function playAudio(audioBuffer: ArrayBuffer): Promise<void> {
   const tempFile = `/tmp/voice-${Date.now()}.mp3`;
   await Bun.write(tempFile, audioBuffer);
   const volume = getVolumeSetting();
 
+  const player = detectAudioPlayer();
+  if (!player) {
+    console.error('❌ No audio player found. Install paplay, mpg123, ffplay, or aplay on Linux.');
+    spawn('/bin/rm', [tempFile]); // Clean up temp file
+    throw new Error('No audio player available');
+  }
+
+  const args = player.args(volume, tempFile);
+  console.log(`🔊 Playing audio with: ${player.command.split('/').pop()}`);
+
   return new Promise((resolve, reject) => {
-    const proc = spawn('/usr/bin/afplay', ['-v', volume.toString(), tempFile]);
+    const proc = spawn(player.command, args);
 
     proc.on('error', (error) => {
       console.error('Error playing audio:', error);
+      spawn('/bin/rm', [tempFile]); // Clean up temp file
       reject(error);
     });
 
@@ -200,7 +272,7 @@ async function playAudio(audioBuffer: ArrayBuffer): Promise<void> {
       if (code === 0) {
         resolve();
       } else {
-        reject(new Error(`afplay exited with code ${code}`));
+        reject(new Error(`Audio player exited with code ${code}`));
       }
     });
   });

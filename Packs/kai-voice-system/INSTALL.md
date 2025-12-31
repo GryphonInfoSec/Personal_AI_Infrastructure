@@ -3,7 +3,9 @@
 ## Prerequisites
 
 - **Bun runtime**: `curl -fsSL https://bun.sh/install | bash`
-- **macOS REQUIRED**: Uses `afplay` for audio playback (see platform note below)
+- **Audio player**:
+  - **macOS**: Uses `afplay` (built-in)
+  - **Linux**: Auto-detects `paplay`, `mpg123`, `ffplay`, or `aplay`
 - **ElevenLabs account**: Sign up at [elevenlabs.io](https://elevenlabs.io)
 - **Required PAI Packs** (install these first):
   - `kai-hook-system` - Foundation hook infrastructure
@@ -13,7 +15,7 @@
 
 ## 🚨 CRITICAL: Platform Compatibility Check
 
-> **FOR AI AGENTS:** You MUST run this check FIRST. If the user is on Linux or Windows, STOP and inform them before proceeding.
+> **FOR AI AGENTS:** You MUST run this check FIRST. If the user is on Windows, STOP and inform them before proceeding.
 
 ### Step 0.0: Operating System Check (MANDATORY)
 
@@ -23,31 +25,27 @@ echo "Detected OS: $OS_TYPE"
 
 if [ "$OS_TYPE" = "Darwin" ]; then
   echo "✓ macOS detected - Voice system is fully supported"
+  echo "  Audio: afplay (built-in)"
 elif [ "$OS_TYPE" = "Linux" ]; then
+  echo "✓ Linux detected - Voice system is fully supported"
+  echo "  Audio: Auto-detects paplay, mpg123, ffplay, or aplay"
   echo ""
-  echo "⚠️  WARNING: Linux detected"
-  echo ""
-  echo "The Kai Voice System currently requires macOS because:"
-  echo "  1. Uses 'afplay' for audio playback (macOS built-in)"
-  echo "  2. Uses LaunchAgent for auto-start (macOS only)"
-  echo ""
-  echo "Linux alternatives (requires code modification):"
-  echo "  - Replace 'afplay' with 'aplay', 'paplay', or 'mpv'"
-  echo "  - Replace LaunchAgent with systemd service"
-  echo ""
-  echo "Do you want to proceed anyway? (You'll need to modify the code)"
-  echo "If proceeding, you MUST manually replace audio playback commands."
+  echo "📦 Recommended: Install an audio player if not already present"
+  echo "  - PulseAudio: sudo apt install pulseaudio-utils (paplay)"
+  echo "  - mpg123: sudo apt install mpg123"
+  echo "  - FFmpeg: sudo apt install ffmpeg (ffplay)"
+  echo "  - ALSA: sudo apt install alsa-utils (aplay)"
 else
   echo ""
   echo "❌ UNSUPPORTED: $OS_TYPE detected"
-  echo "The Kai Voice System only supports macOS (and Linux with modifications)."
+  echo "The Kai Voice System currently supports macOS and Linux only."
   echo "Windows is not currently supported."
 fi
 ```
 
 **AI Agent Instructions:**
 - If OS is macOS → Proceed with installation
-- If OS is Linux → Warn user, get explicit confirmation, note they must modify `afplay` calls
+- If OS is Linux → Proceed with installation (audio player auto-detection enabled)
 - If OS is Windows → STOP, do not proceed, inform user it's unsupported
 
 ---
@@ -202,7 +200,14 @@ curl -X POST "https://api.elevenlabs.io/v1/text-to-speech/s3TPKV1kjDlVtZbl4Ksh" 
   -d '{"text": "Hello, this is a test.", "model_id": "eleven_turbo_v2_5"}' \
   --output test.mp3
 
-afplay test.mp3  # Should hear "Hello, this is a test"
+# Play the test file (macOS)
+afplay test.mp3
+
+# Or on Linux (use whichever player you have installed)
+# paplay test.mp3
+# mpg123 test.mp3
+# ffplay -nodisp -autoexit test.mp3
+
 rm test.mp3
 ```
 
@@ -313,6 +318,16 @@ Run the verification checklist in VERIFY.md to confirm everything works.
 
 ### Audio Playback Issues
 
-1. Ensure `afplay` is available (macOS built-in)
+**macOS:**
+1. `afplay` is built-in, should work out of the box
 2. Check system volume
 3. Verify audio permissions
+
+**Linux:**
+1. Install one of the supported audio players:
+   - **PulseAudio**: `sudo apt install pulseaudio-utils` (provides `paplay`)
+   - **mpg123**: `sudo apt install mpg123`
+   - **FFmpeg**: `sudo apt install ffmpeg` (provides `ffplay`)
+   - **ALSA**: `sudo apt install alsa-utils` (provides `aplay`)
+2. Check system volume: `pactl list sinks` or `alsamixer`
+3. Verify audio is working: `speaker-test -t wav -c 2`

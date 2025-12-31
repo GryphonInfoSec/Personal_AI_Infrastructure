@@ -26,16 +26,17 @@ keywords: [voice, tts, elevenlabs, notifications, prosody, speech, agents, perso
 | Platform | Status | Notes |
 |----------|--------|-------|
 | **macOS** | ✅ Fully Supported | Uses `afplay` (built-in) for audio playback |
-| **Linux** | ⚠️ Requires Modification | Must replace `afplay` with `aplay`, `paplay`, or `mpv` |
+| **Linux** | ✅ Fully Supported | Auto-detects `paplay`, `mpg123`, `ffplay`, or `aplay` |
 | **Windows** | ❌ Not Supported | No current implementation |
 
-**Before installing:** The installation guide will check your OS and warn you if modifications are needed.
+**Before installing:** The installation guide will check your OS and verify audio player availability.
 
 ---
 
 ## What This Pack Provides
 
 - **Spoken Notifications**: Hear task completions via ElevenLabs text-to-speech
+- **Cross-Platform Audio**: Supports macOS (`afplay`) and Linux (`paplay`, `mpg123`, `ffplay`, `aplay`)
 - **Prosody Enhancement**: Natural speech patterns with emotional markers
 - **Agent Personalities**: Different voices for different agent types
 - **Intelligent Cleaning**: Strips code blocks and artifacts for clean speech
