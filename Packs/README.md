@@ -26,9 +26,27 @@ Or manually: read `INSTALL.md`, copy files from `src/` to the specified location
 
 ## Available Packs
 
+### Commands
+
 | Pack | Description |
 |------|-------------|
 | [WorkCommand](WorkCommand/) | `/w` and `/work` — search prior work sessions by topic |
+
+### Skills
+
+| Pack | Description |
+|------|-------------|
+| [Agents](Agents/) | Custom agent composition from traits, voices, and personalities |
+| [ContentAnalysis](ContentAnalysis/) | Content extraction and wisdom from videos, podcasts, articles, and YouTube |
+| [Investigation](Investigation/) | OSINT and investigation — company intel, people search, domain lookup |
+| [Media](Media/) | Visual and video content — illustrations, diagrams, infographics, Remotion video |
+| [Research](Research/) | Multi-agent research with quick/standard/extensive/deep modes and 242+ Fabric patterns |
+| [Scraping](Scraping/) | Web scraping via Bright Data proxy escalation and Apify social media actors |
+| [Security](Security/) | Security assessment — recon, web app testing, prompt injection, security news |
+| [Telos](Telos/) | Life OS and project analysis — goals, beliefs, wisdom, dashboards, McKinsey reports |
+| [Thinking](Thinking/) | Analytical thinking — first principles, council debates, red team, brainstorming, science |
+| [USMetrics](USMetrics/) | 68 US economic indicators from FRED, EIA, Treasury, BLS, Census APIs |
+| [Utilities](Utilities/) | Developer tools — CLI generation, skill scaffolding, Fabric, Cloudflare, browser automation |
 
 ## Creating a Pack
 
